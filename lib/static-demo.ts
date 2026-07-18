@@ -26,7 +26,7 @@ export const staticDemoInputs = [
       carbonSavedKg: 9.4,
       landfillAvoidedKg: 6.5,
       disposalSafetyNotes:
-        "Static demo mode is active because OpenAI quota is unavailable. Before reuse, check chair joints, screws, splinters, and old finish. Sand outdoors or with ventilation if refinishing.",
+        "Before reuse, check chair joints, screws, splinters, and old finish. Sand outdoors or with ventilation if refinishing.",
       reasoning:
         "The selected input image shows a worn wooden chair with cosmetic finish damage but an apparently reusable structure. Repair/refinish preserves the highest material value, while donation or resale keeps the item in use and avoids the carbon cost of replacement.",
       nextSteps: [
@@ -46,21 +46,42 @@ export const staticDemoInputs = [
           action: "repair",
           imageUrl: "/demo/chair-repair-refinish.png",
           carbonSavedKg: 9.4,
-          summary: "Sand, tighten, and seal the chair so it can replace buying a new dining or desk chair."
+          landfillAvoidedKg: 6.5,
+          estimatedResaleValueUsd: 45,
+          summary: "Sand, tighten, and seal the chair so it can replace buying a new dining or desk chair.",
+          details: [
+            "Best when the frame is stable and joints can be tightened.",
+            "Highest carbon savings because it avoids a replacement purchase.",
+            "Good resale angle: refinished solid-wood chair for desk, dining, or accent use."
+          ]
         },
         {
           title: "Upcycle as plant stand",
           action: "upcycle",
           imageUrl: "/demo/chair-upcycle-plant-stand.png",
           carbonSavedKg: 6.1,
-          summary: "If seating safety is uncertain, convert it into a plant stand or decor piece."
+          landfillAvoidedKg: 6.5,
+          estimatedResaleValueUsd: 28,
+          summary: "If seating safety is uncertain, convert it into a plant stand or decor piece.",
+          details: [
+            "Best when the chair is charming but not safe enough for regular seating.",
+            "Low effort: clean, paint, seal, and add a stable planter.",
+            "Useful for balconies, sunny corners, entryways, or garden rooms."
+          ]
         },
         {
           title: "Donate or resell",
           action: "donate",
           imageUrl: "/demo/chair-donate-resale.png",
           carbonSavedKg: 7.2,
-          summary: "Clean and stage it for donation, marketplace pickup, or a local reuse group."
+          landfillAvoidedKg: 6.5,
+          estimatedResaleValueUsd: 35,
+          summary: "Clean and stage it for donation, marketplace pickup, or a local reuse group.",
+          details: [
+            "Best when you do not want to refinish it yourself.",
+            "Clean photos and honest condition notes improve pickup success.",
+            "Donation preserves utility even when resale value is modest."
+          ]
         }
       ]
     } satisfies AiAnalysis

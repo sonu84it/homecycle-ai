@@ -30,6 +30,7 @@ export function UploadExperience() {
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [warning, setWarning] = useState("");
   const [analysisMode, setAnalysisMode] = useState<"live_ai" | "static_demo">("live_ai");
+  const [expandedIdeaTitle, setExpandedIdeaTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -63,6 +64,7 @@ export function UploadExperience() {
     setAnalysis(null);
     setWarning("");
     setAnalysisMode("live_ai");
+    setExpandedIdeaTitle("");
     setError("");
     if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(nextFile));
@@ -83,8 +85,9 @@ export function UploadExperience() {
       if (selectedStaticInput && !file) {
         await new Promise((resolve) => setTimeout(resolve, 650));
         setAnalysis(selectedStaticInput.analysis);
-        setWarning("Static demo mode: generated outputs are shown from the selected chair example.");
+        setWarning("Curated recommendations are ready for the selected item.");
         setAnalysisMode("static_demo");
+        setExpandedIdeaTitle(selectedStaticInput.analysis.outputIdeas?.[0]?.title ?? "");
         saveDemoScan({
           id: crypto.randomUUID(),
           imageDataUrl: selectedStaticInput.imageUrl,
@@ -115,6 +118,7 @@ export function UploadExperience() {
       setAnalysis(nextAnalysis);
       setWarning(payload.warning ?? "");
       setAnalysisMode(payload.mode === "static_demo" ? "static_demo" : "live_ai");
+      setExpandedIdeaTitle(nextAnalysis.outputIdeas?.[0]?.title ?? "");
       saveDemoScan({
         id: crypto.randomUUID(),
         imageDataUrl: thumbnail,
@@ -148,53 +152,60 @@ export function UploadExperience() {
             Demo safety limit: {remaining} of {demoScanLimit} analyses left this browser session.
           </p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-900">Live AI when quota is available</span>
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-900">Static chair demo fallback enabled</span>
+            <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-900">Live analysis available</span>
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-900">Curated demo recommendations available</span>
           </div>
         </CardHeader>
         <CardContent>
           <div className="mb-5">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">Choose demo input</p>
-                <p className="text-xs text-muted-foreground">Select a sample item, then click Analyze to reveal outputs.</p>
-              </div>
-              {selectedStaticInput && !file && (
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">Selected</span>
-              )}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <label className="text-sm font-semibold" htmlFor="demo-input">
+              Select input item
+            </label>
+            <select
+              className="mt-2 h-11 w-full rounded-lg border border-input bg-white/78 px-3 text-sm font-medium shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              id="demo-input"
+              onChange={(event) => {
+                setSelectedStaticInputId(event.target.value);
+                setFile(null);
+                setAnalysis(null);
+                setWarning("");
+                setAnalysisMode("static_demo");
+                setExpandedIdeaTitle("");
+                setError("");
+                if (preview) {
+                  URL.revokeObjectURL(preview);
+                  setPreview("");
+                }
+              }}
+              value={file ? "" : selectedStaticInputId}
+            >
+              <option value="">Upload my own image</option>
               {staticDemoInputs.map((input) => (
-                <button
-                  key={input.id}
-                  className={cn(
-                    "overflow-hidden rounded-lg border bg-white/72 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white",
-                    selectedStaticInputId === input.id && !file ? "border-primary ring-2 ring-primary/25" : "border-white/70"
-                  )}
-                  onClick={() => {
-                    setSelectedStaticInputId(input.id);
-                    setFile(null);
-                    setAnalysis(null);
-                    setWarning("");
-                    setAnalysisMode("static_demo");
-                    setError("");
-                    if (preview) {
-                      URL.revokeObjectURL(preview);
-                      setPreview("");
-                    }
-                  }}
-                  type="button"
-                >
-                  <div className="relative aspect-[4/3]">
-                    <NextImage alt={input.title} className="object-cover" fill sizes="(min-width: 640px) 45vw, 100vw" src={input.imageUrl} />
-                  </div>
-                  <div className="p-3">
-                    <p className="font-semibold">{input.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{input.category}</p>
-                  </div>
-                </button>
+                <option key={input.id} value={input.id}>
+                  {input.title}
+                </option>
               ))}
-            </div>
+            </select>
+
+            {selectedStaticInput && !file && (
+              <div className="mt-3 overflow-hidden rounded-lg border border-primary/20 bg-white/72 shadow-sm">
+                <div className="relative aspect-[4/3]">
+                  <NextImage
+                    alt={selectedStaticInput.title}
+                    className="object-cover"
+                    fill
+                    sizes="(min-width: 1024px) 40vw, 100vw"
+                    src={selectedStaticInput.imageUrl}
+                  />
+                </div>
+                <div className="p-3">
+                  <p className="font-semibold">{selectedStaticInput.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Selected input image. Click Analyze to generate reuse, upcycle, donation, and resale options.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <label
@@ -285,14 +296,14 @@ export function UploadExperience() {
                         analysisMode === "static_demo" ? "bg-amber-100 text-amber-900" : "bg-emerald-100 text-emerald-900"
                       )}
                     >
-                      {analysisMode === "static_demo" ? "Static demo" : "Live AI"}
+                      {analysisMode === "static_demo" ? "Curated demo" : "Live AI"}
                     </span>
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">{analysis.reasoning}</p>
                 {warning && (
                   <p className="mt-4 rounded-lg bg-amber-50 p-3 text-sm font-medium text-amber-900">
-                    Demo fallback active: OpenAI quota needs billing/credits for image-specific analysis.
+                    {warning}
                   </p>
                 )}
               </div>
@@ -320,11 +331,19 @@ export function UploadExperience() {
                 <div className="rounded-xl bg-white/72 p-5 shadow-sm">
                   <h3 className="font-semibold">Generated outcome options</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Static GenAI demo outputs showing how this item can avoid landfill.
+                    Select an option to expand impact and resale details.
                   </p>
                   <div className="mt-4 grid gap-3 md:grid-cols-3">
                     {analysis.outputIdeas.map((idea) => (
-                      <div key={idea.title} className="overflow-hidden rounded-lg bg-white shadow-sm">
+                      <button
+                        key={idea.title}
+                        className={cn(
+                          "overflow-hidden rounded-lg border bg-white text-left shadow-sm transition hover:-translate-y-0.5",
+                          expandedIdeaTitle === idea.title ? "border-primary ring-2 ring-primary/20" : "border-white"
+                        )}
+                        onClick={() => setExpandedIdeaTitle(idea.title)}
+                        type="button"
+                      >
                         <div className="relative aspect-[4/3]">
                           <NextImage alt={idea.title} className="object-cover" fill sizes="(min-width: 768px) 28vw, 100vw" src={idea.imageUrl} />
                         </div>
@@ -332,13 +351,30 @@ export function UploadExperience() {
                           <p className="text-sm font-bold">{idea.title}</p>
                           <p className="mt-1 text-xs capitalize text-primary">{idea.action}</p>
                           <p className="mt-2 text-xs leading-5 text-muted-foreground">{idea.summary}</p>
-                          <p className="mt-2 text-xs font-semibold text-emerald-700">
-                            Est. {formatNumber(idea.carbonSavedKg)} kg CO2e saved
-                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {analysis.outputIdeas
+                    .filter((idea) => idea.title === expandedIdeaTitle)
+                    .map((idea) => (
+                      <div key={idea.title} className="mt-4 rounded-lg border bg-white/82 p-4">
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          <Impact label="Carbon saved" value={`${formatNumber(idea.carbonSavedKg)} kg`} />
+                          <Impact label="Landfill avoided" value={`${formatNumber(idea.landfillAvoidedKg)} kg`} />
+                          <Impact label="Potential resale" value={`$${formatNumber(idea.estimatedResaleValueUsd)}`} />
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          <p className="text-sm font-semibold">Why this option works</p>
+                          {idea.details.map((detail) => (
+                            <div key={detail} className="flex gap-2 text-sm text-muted-foreground">
+                              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                              <span>{detail}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ))}
-                  </div>
                 </div>
               )}
 

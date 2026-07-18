@@ -31,7 +31,10 @@ export type OutputIdea = {
   action: ScanAction;
   imageUrl: string;
   carbonSavedKg: number;
+  landfillAvoidedKg: number;
+  estimatedResaleValueUsd: number;
   summary: string;
+  details: string[];
 };
 
 export type ScanRow = {

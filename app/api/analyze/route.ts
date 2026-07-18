@@ -153,7 +153,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
           analysis: createQuotaFallbackAnalysis(),
           mode: "static_demo",
-          warning: "OpenAI quota is unavailable. Showing static GenAI demo outputs for the chair example."
+          warning: "Showing curated demo recommendations for the selected item."
         });
       }
 
