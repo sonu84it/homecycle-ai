@@ -75,7 +75,7 @@ Create `.env.local`:
 
 ```bash
 OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4.1
+OPENAI_MODEL=gpt-5.6
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
