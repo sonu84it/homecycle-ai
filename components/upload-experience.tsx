@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { AlertTriangle, Camera, CheckCircle2, CloudUpload, Loader2, Recycle, Sparkles, Store, Wrench } from "lucide-react";
+import NextImage from "next/image";
 import Link from "next/link";
 import type { ComponentType } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -20,12 +21,35 @@ import { cn, formatNumber } from "@/lib/utils";
 
 const maxUploadBytes = 8 * 1024 * 1024;
 const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+const staticChairOutputs = [
+  {
+    title: "Input: unused worn chair",
+    imageUrl: "/demo/chair-input.jpeg",
+    label: "Input"
+  },
+  {
+    title: "Repair and refinish",
+    imageUrl: "/demo/chair-repair-refinish.png",
+    label: "Repair"
+  },
+  {
+    title: "Upcycle plant stand",
+    imageUrl: "/demo/chair-upcycle-plant-stand.png",
+    label: "Upcycle"
+  },
+  {
+    title: "Donate or resell",
+    imageUrl: "/demo/chair-donate-resale.png",
+    label: "Donate"
+  }
+];
 
 export function UploadExperience() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [warning, setWarning] = useState("");
+  const [analysisMode, setAnalysisMode] = useState<"live_ai" | "static_demo">("live_ai");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -56,6 +80,7 @@ export function UploadExperience() {
     setFile(nextFile);
     setAnalysis(null);
     setWarning("");
+    setAnalysisMode("live_ai");
     setError("");
     if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(nextFile));
@@ -91,6 +116,7 @@ export function UploadExperience() {
       const nextAnalysis = payload.analysis as AiAnalysis;
       setAnalysis(nextAnalysis);
       setWarning(payload.warning ?? "");
+      setAnalysisMode(payload.mode === "static_demo" ? "static_demo" : "live_ai");
       saveDemoScan({
         id: crypto.randomUUID(),
         imageDataUrl: thumbnail,
@@ -114,14 +140,19 @@ export function UploadExperience() {
   }, [analysis]);
 
   return (
-    <section className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-      <Card className="glass shadow-glass">
+    <div className="space-y-5">
+      <section className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+        <Card className="glass shadow-glass">
         <CardHeader>
           <CardTitle className="text-2xl">Upload an item</CardTitle>
           <p className="text-sm text-muted-foreground">Use a clear photo with the whole object visible.</p>
           <p className="text-xs font-semibold text-primary">
             Demo safety limit: {remaining} of {demoScanLimit} analyses left this browser session.
           </p>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+            <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-900">Live AI when quota is available</span>
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-900">Static chair demo fallback enabled</span>
+          </div>
         </CardHeader>
         <CardContent>
           <label
@@ -174,9 +205,9 @@ export function UploadExperience() {
           {error && <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           {warning && <p className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">{warning}</p>}
         </CardContent>
-      </Card>
+        </Card>
 
-      <Card className="glass shadow-glass">
+        <Card className="glass shadow-glass">
         <CardHeader>
           <CardTitle className="text-2xl">Recommendation</CardTitle>
           <p className="text-sm text-muted-foreground">Your AI analysis appears here after upload.</p>
@@ -202,9 +233,19 @@ export function UploadExperience() {
                     <p className="text-sm text-muted-foreground">{analysis.category}</p>
                     <h2 className="mt-1 text-3xl font-bold">{analysis.objectName}</h2>
                   </div>
-                  <span className={cn("rounded-full px-3 py-1 text-sm font-bold capitalize", actionColor)}>
-                    {analysis.recommendedAction}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={cn("rounded-full px-3 py-1 text-sm font-bold capitalize", actionColor)}>
+                      {analysis.recommendedAction}
+                    </span>
+                    <span
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-bold",
+                        analysisMode === "static_demo" ? "bg-amber-100 text-amber-900" : "bg-emerald-100 text-emerald-900"
+                      )}
+                    >
+                      {analysisMode === "static_demo" ? "Static demo" : "Live AI"}
+                    </span>
+                  </div>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">{analysis.reasoning}</p>
                 {warning && (
@@ -233,6 +274,32 @@ export function UploadExperience() {
                 <Impact label="Resale estimate" value={`$${formatNumber(analysis.estimatedResaleValueUsd)}`} />
               </div>
 
+              {analysis.outputIdeas && analysis.outputIdeas.length > 0 && (
+                <div className="rounded-xl bg-white/72 p-5 shadow-sm">
+                  <h3 className="font-semibold">Generated outcome options</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Static GenAI demo outputs showing how this item can avoid landfill.
+                  </p>
+                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+                    {analysis.outputIdeas.map((idea) => (
+                      <div key={idea.title} className="overflow-hidden rounded-lg bg-white shadow-sm">
+                        <div className="relative aspect-[4/3]">
+                          <NextImage alt={idea.title} className="object-cover" fill sizes="(min-width: 768px) 28vw, 100vw" src={idea.imageUrl} />
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-bold">{idea.title}</p>
+                          <p className="mt-1 text-xs capitalize text-primary">{idea.action}</p>
+                          <p className="mt-2 text-xs leading-5 text-muted-foreground">{idea.summary}</p>
+                          <p className="mt-2 text-xs font-semibold text-emerald-700">
+                            Est. {formatNumber(idea.carbonSavedKg)} kg CO2e saved
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid gap-3 sm:grid-cols-3">
                 <Signal enabled={analysis.canDonate} icon={Recycle} label="Donation fit" />
                 <Signal enabled={analysis.canSell} icon={Store} label="Resale fit" />
@@ -260,8 +327,33 @@ export function UploadExperience() {
             </motion.div>
           )}
         </CardContent>
+        </Card>
+      </section>
+
+      <Card className="glass shadow-glass">
+        <CardHeader>
+          <CardTitle className="text-2xl">Static GenAI chair demo</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            While OpenAI quota is unavailable, this static path shows how the app explains input-to-output sustainability options.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-4">
+            {staticChairOutputs.map((item) => (
+              <div key={item.title} className="overflow-hidden rounded-lg bg-white/72 shadow-sm">
+                <div className="relative aspect-[4/3]">
+                  <NextImage alt={item.title} className="object-cover" fill sizes="(min-width: 768px) 24vw, 100vw" src={item.imageUrl} />
+                </div>
+                <div className="p-3">
+                  <p className="text-xs font-bold uppercase text-primary">{item.label}</p>
+                  <p className="mt-1 text-sm font-semibold">{item.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
       </Card>
-    </section>
+    </div>
   );
 }
 
@@ -322,7 +414,7 @@ function fileToDataUrl(file: File) {
 
 function createThumbnail(file: File) {
   return new Promise<string>((resolve, reject) => {
-    const image = new Image();
+    const image = new window.Image();
     const objectUrl = URL.createObjectURL(file);
     image.onload = () => {
       const canvas = document.createElement("canvas");

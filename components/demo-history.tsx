@@ -65,6 +65,15 @@ export function DemoHistory() {
                 <MiniStat label="Landfill" value={`${formatNumber(scan.analysis.landfillAvoidedKg)} kg`} />
                 <MiniStat label="Value" value={`$${formatNumber(scan.analysis.estimatedResaleValueUsd)}`} />
               </CardContent>
+              {scan.analysis.outputIdeas && scan.analysis.outputIdeas.length > 0 && (
+                <div className="grid grid-cols-3 gap-1 px-5 pb-5">
+                  {scan.analysis.outputIdeas.map((idea) => (
+                    <div key={idea.title} className="relative aspect-square overflow-hidden rounded-md bg-white/70" title={idea.title}>
+                      <Image alt={idea.title} className="object-cover" fill sizes="90px" src={idea.imageUrl} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           ))}
         </section>

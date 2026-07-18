@@ -23,6 +23,15 @@ export type AiAnalysis = {
   reasoning: string;
   nextSteps: string[];
   marketplaceTips: string[];
+  outputIdeas?: OutputIdea[];
+};
+
+export type OutputIdea = {
+  title: string;
+  action: ScanAction;
+  imageUrl: string;
+  carbonSavedKg: number;
+  summary: string;
 };
 
 export type ScanRow = {

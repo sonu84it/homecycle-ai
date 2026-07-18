@@ -44,36 +44,61 @@ export function normalizeAnalysis(input: unknown): NormalizedAiAnalysis {
 
 export function createQuotaFallbackAnalysis(): AiAnalysis {
   return {
-    objectName: "Demo household item",
-    category: "Household goods",
-    primaryMaterial: "Mixed material",
-    secondaryMaterials: ["Unknown"],
-    condition: "unknown",
+    objectName: "Worn wooden dining chair",
+    category: "Furniture",
+    primaryMaterial: "Solid wood",
+    secondaryMaterials: ["Old paint or stain", "Possible glue/fasteners"],
+    condition: "fair",
     canReuse: true,
     canDonate: true,
-    canSell: false,
-    canRepair: false,
+    canSell: true,
+    canRepair: true,
     canUpcycle: true,
-    canRecycle: true,
-    recommendedAction: "donate",
-    alternativeActions: ["reuse", "upcycle", "recycle"],
-    confidence: 0.42,
-    estimatedResaleValueUsd: 0,
-    estimatedRepairCostUsd: 0,
-    carbonSavedKg: 1.2,
-    landfillAvoidedKg: 0.8,
+    canRecycle: false,
+    recommendedAction: "repair",
+    alternativeActions: ["donate", "sell", "upcycle"],
+    confidence: 0.86,
+    estimatedResaleValueUsd: 35,
+    estimatedRepairCostUsd: 18,
+    carbonSavedKg: 9.4,
+    landfillAvoidedKg: 6.5,
     disposalSafetyNotes:
-      "Demo fallback mode is active because the OpenAI project has no available quota. Verify batteries, electronics, sharp edges, and local recycling rules before disposal.",
+      "Static demo mode is active because OpenAI quota is unavailable. Before reuse, check chair joints, screws, splinters, and old finish. Sand outdoors or with ventilation if refinishing.",
     reasoning:
-      "OpenAI quota is unavailable, so this is a conservative demo fallback rather than image-specific AI analysis. For most reusable household items, donation or reuse preserves more value than immediate recycling.",
+      "The supplied example image shows a worn wooden chair with cosmetic finish damage but an apparently reusable structure. Repair/refinish preserves the highest material value, while donation or resale keeps the item in use and avoids the carbon cost of replacement.",
     nextSteps: [
-      "Enable OpenAI billing or add credits for image-specific recommendations.",
-      "If the item is clean and functional, place it in a donation or reuse pile.",
-      "If it is broken, separate obvious recyclable materials and check local rules."
+      "Tighten joints and inspect cross braces before anyone sits on it.",
+      "Sand rough flakes and seal with low-VOC finish for safe reuse.",
+      "If you do not need it, photograph it near a window and list it as rustic solid-wood furniture.",
+      "If the seat is unstable, upcycle it into a plant stand instead of seating."
     ],
     marketplaceTips: [
-      "Use the real AI analysis once quota is restored for item-specific resale tips.",
-      "For demo judging, explain that this fallback prevents quota errors from blocking the flow."
+      "Mention solid wood, rustic patina, and any repaired joints.",
+      "Photograph the chair in natural light with scale context.",
+      "Price low enough for pickup: $20-$45 depending on stability."
+    ],
+    outputIdeas: [
+      {
+        title: "Repair and refinish",
+        action: "repair",
+        imageUrl: "/demo/chair-repair-refinish.png",
+        carbonSavedKg: 9.4,
+        summary: "Sand, tighten, and seal the chair so it can replace buying a new dining or desk chair."
+      },
+      {
+        title: "Upcycle as plant stand",
+        action: "upcycle",
+        imageUrl: "/demo/chair-upcycle-plant-stand.png",
+        carbonSavedKg: 6.1,
+        summary: "If seating safety is uncertain, convert it into a plant stand or decor piece."
+      },
+      {
+        title: "Donate or resell",
+        action: "donate",
+        imageUrl: "/demo/chair-donate-resale.png",
+        carbonSavedKg: 7.2,
+        summary: "Clean and stage it for donation, marketplace pickup, or a local reuse group."
+      }
     ]
   };
 }

@@ -152,7 +152,8 @@ export async function POST(request: Request) {
       if (isOpenAIQuotaError(openaiError)) {
         return NextResponse.json({
           analysis: createQuotaFallbackAnalysis(),
-          warning: "OpenAI quota is unavailable. Returned demo fallback analysis."
+          mode: "static_demo",
+          warning: "OpenAI quota is unavailable. Showing static GenAI demo outputs for the chair example."
         });
       }
 
