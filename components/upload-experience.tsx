@@ -16,37 +16,17 @@ import {
   remainingAnalyses,
   saveDemoScan
 } from "@/lib/demo-storage";
+import { getStaticDemoInput, staticDemoInputs } from "@/lib/static-demo";
 import type { AiAnalysis } from "@/lib/types";
 import { cn, formatNumber } from "@/lib/utils";
 
 const maxUploadBytes = 8 * 1024 * 1024;
 const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
-const staticChairOutputs = [
-  {
-    title: "Input: unused worn chair",
-    imageUrl: "/demo/chair-input.jpeg",
-    label: "Input"
-  },
-  {
-    title: "Repair and refinish",
-    imageUrl: "/demo/chair-repair-refinish.png",
-    label: "Repair"
-  },
-  {
-    title: "Upcycle plant stand",
-    imageUrl: "/demo/chair-upcycle-plant-stand.png",
-    label: "Upcycle"
-  },
-  {
-    title: "Donate or resell",
-    imageUrl: "/demo/chair-donate-resale.png",
-    label: "Donate"
-  }
-];
 
 export function UploadExperience() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
+  const [selectedStaticInputId, setSelectedStaticInputId] = useState(staticDemoInputs[0]?.id ?? "");
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [warning, setWarning] = useState("");
   const [analysisMode, setAnalysisMode] = useState<"live_ai" | "static_demo">("live_ai");
@@ -55,7 +35,8 @@ export function UploadExperience() {
   const [dragging, setDragging] = useState(false);
   const [remaining, setRemaining] = useState(demoScanLimit);
 
-  const canSubmit = Boolean(file) && !saving && remaining > 0;
+  const selectedStaticInput = selectedStaticInputId ? getStaticDemoInput(selectedStaticInputId) : undefined;
+  const canSubmit = Boolean(file || selectedStaticInput) && !saving && remaining > 0;
 
   useEffect(() => {
     setRemaining(remainingAnalyses());
@@ -78,6 +59,7 @@ export function UploadExperience() {
       return;
     }
     setFile(nextFile);
+    setSelectedStaticInputId("");
     setAnalysis(null);
     setWarning("");
     setAnalysisMode("live_ai");
@@ -87,7 +69,7 @@ export function UploadExperience() {
   }
 
   async function analyze() {
-    if (!file) return;
+    if (!file && !selectedStaticInput) return;
     if (getAnalysisCount() >= demoScanLimit) {
       setRemaining(0);
       setError(`Demo limit reached: ${demoScanLimit} image analyses per browser session.`);
@@ -98,6 +80,22 @@ export function UploadExperience() {
     setError("");
 
     try {
+      if (selectedStaticInput && !file) {
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        setAnalysis(selectedStaticInput.analysis);
+        setWarning("Static demo mode: generated outputs are shown from the selected chair example.");
+        setAnalysisMode("static_demo");
+        saveDemoScan({
+          id: crypto.randomUUID(),
+          imageDataUrl: selectedStaticInput.imageUrl,
+          analysis: selectedStaticInput.analysis,
+          createdAt: new Date().toISOString()
+        });
+        setRemaining(demoScanLimit - incrementAnalysisCount());
+        return;
+      }
+
+      if (!file) return;
       const imageDataUrl = await fileToDataUrl(file);
       const thumbnail = await createThumbnail(file);
       const response = await fetch("/api/analyze", {
@@ -155,6 +153,50 @@ export function UploadExperience() {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">Choose demo input</p>
+                <p className="text-xs text-muted-foreground">Select a sample item, then click Analyze to reveal outputs.</p>
+              </div>
+              {selectedStaticInput && !file && (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">Selected</span>
+              )}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {staticDemoInputs.map((input) => (
+                <button
+                  key={input.id}
+                  className={cn(
+                    "overflow-hidden rounded-lg border bg-white/72 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white",
+                    selectedStaticInputId === input.id && !file ? "border-primary ring-2 ring-primary/25" : "border-white/70"
+                  )}
+                  onClick={() => {
+                    setSelectedStaticInputId(input.id);
+                    setFile(null);
+                    setAnalysis(null);
+                    setWarning("");
+                    setAnalysisMode("static_demo");
+                    setError("");
+                    if (preview) {
+                      URL.revokeObjectURL(preview);
+                      setPreview("");
+                    }
+                  }}
+                  type="button"
+                >
+                  <div className="relative aspect-[4/3]">
+                    <NextImage alt={input.title} className="object-cover" fill sizes="(min-width: 640px) 45vw, 100vw" src={input.imageUrl} />
+                  </div>
+                  <div className="p-3">
+                    <p className="font-semibold">{input.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{input.category}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <label
             className={cn(
               "flex aspect-[4/3] cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed bg-white/62 p-6 text-center transition",
@@ -179,7 +221,7 @@ export function UploadExperience() {
                 <div className="flex size-16 items-center justify-center rounded-xl bg-primary/10">
                   <CloudUpload className="size-9 text-primary" />
                 </div>
-                <p className="mt-4 text-lg font-semibold">Drop a photo here</p>
+                <p className="mt-4 text-lg font-semibold">Or upload your own photo</p>
                 <p className="mt-2 text-sm text-muted-foreground">Camera, gallery, PNG, JPG, or WebP</p>
                 <p className="mt-1 text-xs text-muted-foreground">Maximum 8 MB</p>
               </>
@@ -330,29 +372,6 @@ export function UploadExperience() {
         </Card>
       </section>
 
-      <Card className="glass shadow-glass">
-        <CardHeader>
-          <CardTitle className="text-2xl">Static GenAI chair demo</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            While OpenAI quota is unavailable, this static path shows how the app explains input-to-output sustainability options.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-4">
-            {staticChairOutputs.map((item) => (
-              <div key={item.title} className="overflow-hidden rounded-lg bg-white/72 shadow-sm">
-                <div className="relative aspect-[4/3]">
-                  <NextImage alt={item.title} className="object-cover" fill sizes="(min-width: 768px) 24vw, 100vw" src={item.imageUrl} />
-                </div>
-                <div className="p-3">
-                  <p className="text-xs font-bold uppercase text-primary">{item.label}</p>
-                  <p className="mt-1 text-sm font-semibold">{item.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
