@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/card";
+import { Card } from "@/components/card";
 import { actionCount, type DemoScan, getDemoScans } from "@/lib/demo-storage";
 import type { ScanAction } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function DemoDashboard() {
     return () => window.removeEventListener("homecycle-demo-scans-updated", sync);
   }, []);
 
-  const recent = scans.slice(0, 6);
+  const recent = scans.slice(0, 3);
   const carbon = scans.reduce((sum, item) => sum + Number(item.analysis.carbonSavedKg ?? 0), 0);
   const landfill = scans.reduce((sum, item) => sum + Number(item.analysis.landfillAvoidedKg ?? 0), 0);
   const resale = scans.reduce((sum, item) => sum + Number(item.analysis.estimatedResaleValueUsd ?? 0), 0);
@@ -30,90 +30,78 @@ export function DemoDashboard() {
 
   return (
     <AppShell>
-      <section className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <section className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-primary">Circular home dashboard</p>
-          <h1 className="mt-2 text-3xl font-bold sm:text-5xl">Demo household impact</h1>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            No login needed. This demo keeps scans in this browser session and limits analysis volume for safety.
-          </p>
+          <p className="text-sm font-semibold text-primary">Circular home</p>
+          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">Your impact</h1>
         </div>
-        <Button asChild size="lg">
+        <Button asChild size="sm">
           <Link href="/upload">
-            Scan an item <ArrowRight className="size-4" />
+            Scan item <ArrowRight className="size-4" />
           </Link>
         </Button>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { label: "Carbon saved", value: `${formatNumber(carbon)} kg`, icon: Leaf },
           { label: "Landfill avoided", value: `${formatNumber(landfill)} kg`, icon: Recycle },
           { label: "Potential resale", value: `$${formatNumber(resale)}`, icon: BadgeDollarSign },
           { label: "Impact score", value: `${impactScore}/100`, icon: PackageCheck }
         ].map((stat) => (
-          <Card key={stat.label} className="glass shadow-glass">
-            <CardHeader className="pb-3">
+          <Card className="glass p-4 shadow-glass" key={stat.label}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
+                <p className="mt-1 text-2xl font-bold">{stat.value}</p>
+              </div>
               <stat.icon className="size-5 text-primary" />
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{stat.value}</p>
-            </CardContent>
+            </div>
           </Card>
         ))}
       </section>
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="glass shadow-glass">
-          <CardHeader>
-            <CardTitle>Recent scans</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recent.length === 0 ? (
-              <div className="rounded-lg border border-dashed bg-white/55 p-8 text-center">
-                <p className="font-semibold">No scans yet</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Upload a household item to create your first recommendation.
-                </p>
-              </div>
-            ) : (
-              recent.map((scan) => (
-                <div key={scan.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/72 p-3 shadow-sm">
-                  <div>
-                    <p className="font-semibold">{scan.analysis.objectName}</p>
-                    <p className="text-sm capitalize text-muted-foreground">
-                      {scan.analysis.category} · {scan.analysis.recommendedAction}
-                    </p>
-                  </div>
-                  <p className="shrink-0 text-sm font-semibold text-primary">{formatNumber(scan.analysis.carbonSavedKg)} kg CO2e</p>
-                </div>
-              ))
+      <section className="mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
+        <Card className="glass p-4 shadow-glass">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-semibold">Recent scans</h2>
+            {scans.length > 0 && (
+              <Link className="text-xs font-semibold text-primary hover:underline" href="/history">
+                View all
+              </Link>
             )}
-          </CardContent>
+          </div>
+          {recent.length === 0 ? (
+            <div className="mt-3 rounded-lg border border-dashed bg-white/55 p-5 text-sm text-muted-foreground">
+              Your first circular recommendation will appear here.
+            </div>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {recent.map((scan) => (
+                <Link className="flex items-center justify-between gap-3 rounded-lg bg-white/72 px-3 py-2 transition hover:bg-white" href="/history" key={scan.id}>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{scan.analysis.objectName}</p>
+                    <p className="text-xs capitalize text-muted-foreground">{scan.analysis.recommendedAction}</p>
+                  </div>
+                  <p className="shrink-0 text-xs font-semibold text-primary">{formatNumber(scan.analysis.carbonSavedKg)} kg CO2e</p>
+                </Link>
+              ))}
+            </div>
+          )}
         </Card>
 
-        <Card className="glass shadow-glass">
-          <CardHeader>
-            <CardTitle>Action mix</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <Card className="glass p-4 shadow-glass">
+          <h2 className="font-semibold">Action mix</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
             {actions.map((action) => {
               const count = actionCount(scans, action);
-              const width = scans.length ? `${Math.max(10, (count / scans.length) * 100)}%` : "10%";
               return (
-                <div key={action}>
-                  <div className="mb-1 flex justify-between text-sm">
-                    <span className="capitalize">{action}</span>
-                    <span className="text-muted-foreground">{count}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-white/70">
-                    <div className="h-2 rounded-full bg-primary transition-all" style={{ width }} />
-                  </div>
-                </div>
+                <span className="rounded-md bg-white/74 px-2 py-1 text-xs font-semibold capitalize" key={action}>
+                  {action} {count}
+                </span>
               );
             })}
-          </CardContent>
+          </div>
         </Card>
       </section>
     </AppShell>

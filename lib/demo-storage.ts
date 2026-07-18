@@ -2,7 +2,7 @@
 
 import type { AiAnalysis, ScanAction } from "@/lib/types";
 
-export const demoScanLimit = 5;
+export const demoScanLimit = 6;
 const scansKey = "homecycle.demo.scans";
 const countKey = "homecycle.demo.analysis-count";
 const sessionKey = "homecycle.demo.session-id";

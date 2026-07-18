@@ -8,29 +8,29 @@ Show the HomeCycle AI landing page.
 
 ## 0:20-0:45 - Product Flow
 
-"HomeCycle AI turns a photo into a circular-economy recommendation. I sign in, upload a household item, and GPT-5.6 Vision analyzes what it is, what it is made of, its condition, and the best next action."
+"HomeCycle AI turns a household item into a circular-economy recommendation. For this demo, there is no sign-in step. I choose one of six curated input photos and click Analyze with AI to reveal reusable, repairable, donation, resale, upcycling, and recycling options."
 
-Navigate to login, then dashboard.
+Navigate to the upload page and show the input dropdown.
 
 ## 0:45-1:35 - Live Scan
 
-"I can use camera, gallery, or drag-and-drop upload. The app stores the image in Supabase Storage, sends only a user-owned storage path to the backend, and the backend creates a short-lived signed URL for OpenAI."
+"The demo covers six common household items: an old wooden chair, used books, a broken plastic laundry basket, a used smartphone, a glass jam jar, and a faded cotton T-shirt. The recommendation changes by item condition and material."
 
-Upload an item photo and show the skeleton loader.
+Select an item, click Analyze with AI, and show the skeleton loader.
 
-"The response is strict structured JSON, not loose prose, so the UI can reliably show recommendation, resale estimate, repair fit, donation fit, recycling fit, safety notes, and environmental impact."
+"The result is structured like production AI output, not loose prose. The UI can reliably show the item, condition, best action, next steps, output images, carbon savings, landfill avoided, potential resale value, and safety notes."
 
-Show the recommendation panel.
+Show the generated outcome options and expand one option.
 
 ## 1:35-2:10 - Dashboard
 
-"When I save a scan, it becomes part of my circular inventory. The dashboard tracks carbon saved, landfill avoided, potential resale value, impact score, recent scans, and action mix."
+"Each analysis becomes part of a browser-session circular inventory. The dashboard tracks carbon saved, landfill avoided, potential resale value, recent scans, and action mix."
 
 Navigate to dashboard and history.
 
 ## 2:10-2:40 - Architecture
 
-"The app uses Next.js 15, React 19, Supabase Auth, Postgres, Storage, and the OpenAI Responses API. Supabase RLS protects each household's data. The API route validates auth, verifies image ownership, rate-limits analysis, calls GPT-5.6 Vision, validates the response with Zod, then stores the result."
+"The app uses Next.js 15, React 19, browser-session demo persistence, and a production-ready OpenAI analysis route. The demo includes session limits to reduce abuse, static fallback data for reliable judging, and an optional Supabase schema for a post-demo production path."
 
 Show README architecture diagram.
 

@@ -87,7 +87,29 @@ npm run verify:env
 
 ## Demo Mode
 
-The default app is intentionally no-login for demos. A browser session can analyze up to 5 images, enforced in the client and again in the API route. Session history clears when the browser session ends.
+The default app is intentionally no-login for demos. A browser session can analyze up to 6 images, enforced in the client and again in the API route. Session history clears when the browser session ends.
+
+## Curated Demo Items
+
+| Item | AI Recommendation | Key Reasoning |
+| --- | --- | --- |
+| Old wooden chair | Repair / Upcycle | Structurally sound despite scratches and worn finish. Repairing or creatively repurposing extends its life and avoids unnecessary waste. |
+| Used books | Donate / Reuse | Books are in good condition and can benefit schools, libraries, charities, or other readers before considering recycling. |
+| Broken plastic laundry basket | Recycle / Upcycle | Cracked body and broken handle reduce normal laundry use. Recycle through an appropriate plastic recycling facility if accepted locally, or reuse only for light-duty storage. |
+| Used smartphone | Sell / Trade-in / E-waste recycle | Functional phones retain resale value. If non-functional, use an authorized e-waste recycler to recover valuable materials safely. |
+| Glass jam jar | Reuse / Upcycle | Clean and undamaged glass jars are ideal for food storage, pantry organization, DIY crafts, or home decor before recycling. |
+| Faded cotton T-shirt | Donate / Upcycle / Textile recycle | Wearable clothing can be donated. If too worn, repurpose into cleaning cloths or craft projects, with textile recycling as the final option. |
+
+## Sustainability Hierarchy
+
+The demo showcases a circular-economy decision process:
+
+- **Reuse:** glass jar
+- **Repair:** wooden chair
+- **Upcycle:** chair, T-shirt, jar
+- **Donate:** books, T-shirt
+- **Sell / Trade-in:** smartphone
+- **Recycle:** plastic basket, e-waste for a non-working phone, glass or textiles when reuse is no longer practical
 
 ## Optional Supabase Setup
 

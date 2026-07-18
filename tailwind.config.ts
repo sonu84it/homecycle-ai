@@ -34,9 +34,9 @@ const config: Config = {
         }
       },
       borderRadius: {
-        xl: "1rem",
-        lg: "0.75rem",
-        md: "0.5rem"
+        xl: "0.5rem",
+        lg: "0.5rem",
+        md: "0.375rem"
       },
       boxShadow: {
         glass: "0 24px 80px rgba(30, 65, 49, 0.14)"

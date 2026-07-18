@@ -8,7 +8,7 @@ const windowMs = 60_000;
 const maxRequestsPerWindow = 5;
 const sessionWindows = new Map<string, { count: number; resetAt: number }>();
 const sessionWindowMs = 24 * 60 * 60 * 1000;
-const maxRequestsPerSession = 5;
+const maxRequestsPerSession = 6;
 const maxDataUrlLength = 12_000_000;
 
 const analysisSchema = {

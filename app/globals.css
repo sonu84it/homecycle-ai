@@ -27,18 +27,15 @@
 body {
   @apply bg-background text-foreground antialiased;
   min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.86);
 }
 
 .aurora {
-  background:
-    radial-gradient(circle at 18% 18%, rgba(63, 186, 132, 0.26), transparent 28%),
-    radial-gradient(circle at 76% 12%, rgba(58, 145, 191, 0.22), transparent 30%),
-    radial-gradient(circle at 54% 78%, rgba(248, 166, 74, 0.22), transparent 30%),
-    linear-gradient(135deg, #f8f4ea 0%, #edf7f4 45%, #f9f4ec 100%);
+  background: #f4f7f3;
 }
